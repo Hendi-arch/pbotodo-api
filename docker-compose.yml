@@ -19,19 +19,10 @@ services:
   todo-api:
     depends_on:
       - todo-db
-      - firebase-service
     image: pbo/todo-api
     container_name: todo-api
     ports:
       - 4000:4000
-    restart: always
-
-  firebase-service:
-    container_name: firebase-service
-    image: xulucloudsys/firebase-service
-    volumes:
-      - /home/hendinofiansyah11/projects/pbo/todo/pbotodo-firebase-adminsdk-glb5o-8821864afc.json:/service/firebase-adminsdk.json
-      - /home/hendinofiansyah11/projects/pbo/todo/firebase.yml:/service/firebase.yml
     restart: always
 
 volumes:
