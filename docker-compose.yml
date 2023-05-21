@@ -11,7 +11,6 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgrespass
-      - POSTGRES_DB=todo
       - POSTGRES_INITDB_ARGS=--auth-host=password
       - POSTGRES_HOST_AUTH_METHOD=password
       - TZ=Asia/Jakarta
