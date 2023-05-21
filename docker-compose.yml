@@ -13,7 +13,6 @@ services:
       - POSTGRES_PASSWORD=postgrespass
       - POSTGRES_INITDB_ARGS=--auth-host=password
       - POSTGRES_HOST_AUTH_METHOD=password
-      - TZ=Asia/Jakarta
     restart: always
 
   todo-api:
