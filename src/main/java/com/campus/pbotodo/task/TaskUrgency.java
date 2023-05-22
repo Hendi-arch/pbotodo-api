@@ -2,9 +2,9 @@ package com.campus.pbotodo.task;
 
 public enum TaskUrgency {
 
-    IMPORTANT("important", "important"),
+    IMPORTANT("important_notification_channel_id", "important"),
 
-    NOT_IMPORTANT("not_important", "default");
+    NOT_IMPORTANT("not_important_notification_channel_id", "default");
 
     /**
      * The notification's urgency.
