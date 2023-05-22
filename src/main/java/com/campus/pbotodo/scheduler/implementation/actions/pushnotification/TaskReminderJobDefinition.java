@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -14,10 +13,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import com.campus.pbotodo.common.BaseServices;
-import com.campus.pbotodo.firebase.fcm.FCMService;
-import com.campus.pbotodo.firebase.fcm.dto.FCMRequest;
-import com.campus.pbotodo.firebase.fcm.dto.FCMResponse;
-import com.campus.pbotodo.firebase.fcm.dto.NotificationConfig;
+import com.campus.pbotodo.firebase.messaging.FCMService;
+import com.campus.pbotodo.firebase.messaging.PushNotificationConfig;
+import com.campus.pbotodo.firebase.messaging.PushNotificationRequest;
 import com.campus.pbotodo.scheduler.dto.ScheduleDefinitionDto;
 import com.campus.pbotodo.scheduler.dto.ScheduleType;
 import com.campus.pbotodo.scheduler.implementation.actions.TaskActionInterface;
@@ -28,7 +26,8 @@ import com.campus.pbotodo.task.TaskRepo;
 import com.campus.pbotodo.task.TaskUrgency;
 import com.campus.pbotodo.user.UserToken;
 import com.campus.pbotodo.user.UserTokenRepo;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.firebase.ErrorCode;
+import com.google.firebase.messaging.FirebaseMessagingException;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TaskReminderJobDefinition implements TaskActionInterface {
 
-    private FCMService fcmService;
-
     private UserTokenRepo userTokenRepo;
 
     private JwtUtilities jwtUtilities;
@@ -46,7 +43,7 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
     private TaskRepo taskRepo;
 
     private void sendPushNotifications(List<UserToken> userToBeNotify, Long taskId, String taskName, String username,
-            String scheduleId, String taskUrgency) throws JsonProcessingException {
+            String scheduleId, String taskUrgency) {
         for (UserToken user : userToBeNotify) {
             Map<String, String> notificationContentDataFCM = new HashMap<>();
             notificationContentDataFCM.put("taskId", taskId.toString());
@@ -56,18 +53,22 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
             notificationContentDataFCM.put("scheduleId", scheduleId);
 
             // Send notification
-            FCMResponse res = fcmService.sendNotification(new FCMRequest(
-                    "Task Due Soon - " + taskName,
-                    "Complete before deadline. Need help? Let me know.",
-                    notificationContentDataFCM,
-                    user.getDeviceId(),
-                    NotificationConfig.builder()
-                            .sound(TaskUrgency.fromValue(taskUrgency).sound)
-                            .build()));
-            if (res != null && (res.getStatus() == 404 || res.getStatus() == 400
-                    || Objects.isNull(user.getToken()))) {
-                jwtUtilities.removeToken(user.getToken());
-
+            PushNotificationConfig pushNotificationConfig = new PushNotificationConfig();
+            pushNotificationConfig.setSound(TaskUrgency.fromValue(taskUrgency).sound);
+            pushNotificationConfig.setChannelId(TaskUrgency.fromValue(taskUrgency).value);
+            try {
+                FCMService.sendMessage(PushNotificationRequest.builder()
+                        .title("Task Due Soon - " + taskName)
+                        .message("Complete before deadline.")
+                        .data(notificationContentDataFCM)
+                        .token(user.getDeviceId())
+                        .config(pushNotificationConfig)
+                        .build());
+            } catch (FirebaseMessagingException e) {
+                if (e.getErrorCode().equals(ErrorCode.NOT_FOUND) || user.getToken() == null) {
+                    jwtUtilities.removeToken(user.getToken());
+                }
+                e.printStackTrace();
             }
         }
     }

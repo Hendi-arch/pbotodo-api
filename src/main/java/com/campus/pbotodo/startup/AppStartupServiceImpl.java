@@ -8,7 +8,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.campus.pbotodo.firebase.fcm.FCMService;
 import com.campus.pbotodo.scheduler.implementation.actions.pushnotification.FactoryFcmAction;
 import com.campus.pbotodo.scheduler.implementation.service.TaskScheduleService;
 import com.campus.pbotodo.security.utils.JwtUtilities;
@@ -29,9 +28,6 @@ public class AppStartupServiceImpl implements AppStartupService {
     private TaskScheduleService taskScheduleService;
 
     @Autowired
-    private FCMService fcmService;
-
-    @Autowired
     private UserTokenRepo userTokenRepo;
 
     @Autowired
@@ -47,7 +43,7 @@ public class AppStartupServiceImpl implements AppStartupService {
 
         // Restore task scheduler from database
         final Runnable runnableTask = () -> FactoryFcmAction
-                .getTaskReminderScheduleAction(fcmService, userTokenRepo, jwtUtilities, taskRepo)
+                .getTaskReminderScheduleAction(userTokenRepo, jwtUtilities, taskRepo)
                 .restore(taskScheduleService);
 
         cacheExecutorService.execute(runnableTask);

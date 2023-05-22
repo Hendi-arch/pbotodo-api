@@ -1,27 +1,25 @@
-package com.campus.pbotodo.firebase.fcm.dto;
+package com.campus.pbotodo.firebase.messaging;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 
-@Getter
-@Builder
-public class NotificationConfig {
+import lombok.Data;
+
+@Data
+public class PushNotificationConfig {
 
     /**
      * Sets the sound to be played when the device receives the notification.
      *
      * @param sound File name of the sound resource or "default".
      */
-    @Builder.Default
+    @JsonSetter(nulls = Nulls.SKIP)
     private String sound = "default";
 
     /**
-     * Sets the Android notification channel ID (new in Android O). The app must
-     * create a channel
-     * with this channel ID before any notification with this channel ID is
-     * received. If you
-     * don't send this channel ID in the request, or if the channel ID provided has
-     * not yet been
+     * Sets the Android notification channel ID (new in Android O). The app must create a channel
+     * with this channel ID before any notification with this channel ID is received. If you 
+     * don't send this channel ID in the request, or if the channel ID provided has not yet been
      * created by the app, FCM uses the channel ID specified in the app manifest.
      *
      * @param channelId The notification's channel ID.
