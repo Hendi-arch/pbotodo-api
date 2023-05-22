@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -53,5 +54,8 @@ public class User {
 
     @Column(name = "updated_by", length = 30, nullable = false)
     private String updatedBy;
+
+    @Transient
+    private String deviceId;
 
 }

@@ -42,6 +42,7 @@ public class UserService {
         try {
             String username = userSignupRequest.getUsername();
             String password = userSignupRequest.getPassword();
+            String deviceId = userSignupRequest.getDeviceId();
 
             User user = userRepo.findByUsername(username);
             if (user != null) {
@@ -61,6 +62,7 @@ public class UserService {
 
             userTokenRepo.save(UserToken.builder()
                     .token(token)
+                    .deviceId(deviceId)
                     .expiredDate(expiredDate)
                     .username(username)
                     .createdBy(username)
@@ -76,6 +78,8 @@ public class UserService {
     public UserAuthResponse signin(User userSigninRequest) {
         try {
             String username = userSigninRequest.getUsername();
+            String deviceId = userSigninRequest.getDeviceId();
+
             UserDetails userDetails = myUserDetailService.loadUserByUsername(username);
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(username, userSigninRequest.getPassword()));
@@ -84,6 +88,7 @@ public class UserService {
 
             userTokenRepo.save(UserToken.builder()
                     .token(token)
+                    .deviceId(deviceId)
                     .expiredDate(expiredDate)
                     .username(username)
                     .createdBy(username)
