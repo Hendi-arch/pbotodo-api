@@ -52,6 +52,7 @@ public class FCMService {
                         .setIcon(config.getIcon())
                         .setImage(config.getImageUrl())
                         .setChannelId(config.getChannelId())
+                        .setSound(config.getSound())
                         .build())
                 .setPriority(AndroidConfig.Priority.HIGH)
                 .setTtl(Duration.ofDays(28).toMillis())
