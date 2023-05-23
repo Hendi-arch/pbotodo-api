@@ -2,6 +2,7 @@ package com.campus.pbotodo.security.utils;
 
 import java.security.KeyPair;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.function.Function;
@@ -67,9 +68,12 @@ public class JwtUtilities {
     }
 
     private String createToken(HashMap<String, Object> claims, UserDetails subject) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, 5);
+        Date expirationDate = calendar.getTime();
         return Jwts.builder().setClaims(claims).setSubject(subject.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000))
+                .setExpiration(expirationDate)
                 .signWith(rsaKeyPair.getPrivate(), SignatureAlgorithm.RS256).compact();
     }
 
