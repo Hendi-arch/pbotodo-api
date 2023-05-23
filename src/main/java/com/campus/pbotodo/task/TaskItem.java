@@ -33,7 +33,7 @@ public class TaskItem {
     private boolean done;
 
     @NotNull(message = "username is required")
-    @Column(name = "user_id", length = 30, nullable = false)
+    @Column(name = "user_id", nullable = false)
     private String username;
 
     @Builder.Default
@@ -47,7 +47,7 @@ public class TaskItem {
 
     @Builder.Default
     @NotNull(message = "urgency is required")
-    @Column(nullable = false, length = 25)
+    @Column(nullable = false)
     private String urgency = TaskUrgency.NOT_IMPORTANT.value;
 
     @Builder.Default

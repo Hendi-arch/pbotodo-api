@@ -34,16 +34,16 @@ public class UserToken {
 
     @NotNull(message = "Token is null")
     @NotEmpty(message = "Token is empty")
-    @Column(unique = true, length = 500, nullable = false)
+    @Column(unique = true, nullable = false)
     private String token;
 
-    @Column(length = 1000, name = "device_id")
+    @Column(name = "device_id")
     private String deviceId;
 
     @Column(name = "expired_date", nullable = false)
     private Date expiredDate;
 
-    @Column(length = 30, nullable = false)
+    @Column(nullable = false)
     private String username;
 
     @Builder.Default
@@ -54,10 +54,10 @@ public class UserToken {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "created_by", length = 30, nullable = false)
+    @Column(name = "created_by", nullable = false)
     private String createdBy;
 
-    @Column(name = "updated_by", length = 30, nullable = false)
+    @Column(name = "updated_by", nullable = false)
     private String updatedBy;
 
     @Builder.Default
