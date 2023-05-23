@@ -56,7 +56,7 @@ public class BaseServices {
     }
 
     @Nullable
-    public static ScheduleDefinition getScheduleDefinition(ScheduleDefinitionDto scheduleDefinition) {
+    public static IScheduleDefinition getScheduleDefinition(ScheduleDefinitionDto scheduleDefinition) {
         switch (scheduleDefinition.getScheduleType()) {
             case AT_TIME:
                 return new ScheduleAtTimeOfEvent(scheduleDefinition.getAlarmTime());

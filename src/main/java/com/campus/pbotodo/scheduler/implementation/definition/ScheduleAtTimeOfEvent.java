@@ -7,14 +7,12 @@ import org.springframework.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ScheduleAtTimeOfEvent implements ScheduleDefinition {
+public class ScheduleAtTimeOfEvent implements IScheduleDefinition {
     private String scheduleDefinition;
     private LocalDateTime startTime;
 
     public ScheduleAtTimeOfEvent(LocalDateTime eventDateTime) {
-        this.scheduleDefinition = eventDateTime.getSecond() + " " + eventDateTime.getMinute() + " "
-                + eventDateTime.getHour() + " " + eventDateTime.getDayOfMonth() + " " + eventDateTime.getMonthValue()
-                + " ? " + eventDateTime.getYear();
+        scheduleDefinition = generateScheduleDefinition(eventDateTime);
         log.info("ScheduleAtTimeOfEvent: {}", scheduleDefinition);
     }
 

@@ -121,24 +121,26 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
                             .ofType(TaskReminderJobDefinition.class)
                             .build();
 
-                    JobDetail reminderJobDetail = JobBuilder.newJob()
-                            .withIdentity(taskDefinitionData.get("reminderScheduleId").toString())
-                            .withDescription("Notify user " + task.getUsername()
-                                    + " for Task " + task.getTitle())
-                            .setJobData(new JobDataMap(taskDefinitionData))
-                            .ofType(TaskReminderJobDefinition.class)
-                            .build();
-
                     taskScheduleService.scheduleATask(
                             taskDefinitionData.get("scheduleId").toString(), jobDetail,
                             BaseServices.getScheduleDefinition(new ScheduleDefinitionDto(
                                     task.getDueDate(), ScheduleType.AT_TIME)));
 
-                    taskScheduleService.scheduleATask(
-                            taskDefinitionData.get("reminderScheduleId").toString(), reminderJobDetail,
-                            BaseServices.getScheduleDefinition(new ScheduleDefinitionDto(
-                                    task.getDueDate(),
-                                    ScheduleType.fromValue(task.getNotificationChannelId()))));
+                    if (!task.getNotificationChannelId().equals(ScheduleType.AT_TIME.notificationChannelId)) {
+                        JobDetail reminderJobDetail = JobBuilder.newJob()
+                                .withIdentity(taskDefinitionData.get("reminderScheduleId").toString())
+                                .withDescription("Notify user " + task.getUsername()
+                                        + " for Task " + task.getTitle())
+                                .setJobData(new JobDataMap(taskDefinitionData))
+                                .ofType(TaskReminderJobDefinition.class)
+                                .build();
+
+                        taskScheduleService.scheduleATask(
+                                taskDefinitionData.get("reminderScheduleId").toString(), reminderJobDetail,
+                                BaseServices.getScheduleDefinition(new ScheduleDefinitionDto(
+                                        task.getDueDate(),
+                                        ScheduleType.fromValue(task.getNotificationChannelId()))));
+                    }
                 });
 
         log.info("TaskReminderScheduleAction.restore() END");

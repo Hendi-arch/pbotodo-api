@@ -7,16 +7,16 @@ import org.springframework.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Schedule5MinutesBeforeEvent implements ScheduleDefinition {
+public class Schedule5MinutesBeforeEvent implements IScheduleDefinition {
     private String scheduleDefinition;
     private LocalDateTime startTime;
 
     public Schedule5MinutesBeforeEvent(LocalDateTime eventDateTime) {
-        eventDateTime = eventDateTime.minusMinutes(5);
-        this.scheduleDefinition = eventDateTime.getSecond() + " " + eventDateTime.getMinute() + " "
-                + eventDateTime.getHour() + " " + eventDateTime.getDayOfMonth() + " " + eventDateTime.getMonthValue()
-                + " ? " + eventDateTime.getYear();
-        log.info("Schedule5MinutesBeforeEvent: {}", scheduleDefinition);
+        LocalDateTime fiveMinutesBefore = eventDateTime.minusMinutes(5);
+        if (fiveMinutesBefore.isAfter(LocalDateTime.now())) {
+            scheduleDefinition = generateScheduleDefinition(fiveMinutesBefore);
+            log.info("Schedule5MinutesBeforeEvent: {}", scheduleDefinition);
+        }
     }
 
     @Override

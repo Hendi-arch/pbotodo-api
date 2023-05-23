@@ -1,11 +1,11 @@
 package com.campus.pbotodo.scheduler.implementation.service;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import org.quartz.CronScheduleBuilder;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import com.campus.pbotodo.scheduler.implementation.definition.ScheduleDefinition;
+import com.campus.pbotodo.scheduler.implementation.definition.IScheduleDefinition;
 import com.campus.pbotodo.scheduler.dto.ScheduledTasksDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,18 +38,16 @@ final class QuartzScheduleServiceImpl implements TaskScheduleService {
     final List<ScheduledTasksDto> jobs = new ArrayList<>();
 
     @Override
-    @SuppressWarnings("null")
-    public <T> void scheduleATask(String jobId, T task, ScheduleDefinition scheduleDefinition) {
-        if (Objects.nonNull(scheduleDefinition)) {
+    public <T> void scheduleATask(String jobId, T task, IScheduleDefinition scheduleDefinition) {
+        if (scheduleDefinition != null) {
             removeScheduledTask(jobId);
 
-            final JobDetail jobDetail = (JobDetail) task;
-            final CronTrigger cron;
-
-            if (Objects.nonNull(scheduleDefinition.getStartTime())) {
+            final LocalDateTime startTime = scheduleDefinition.getStartTime();
+            final String cronScheduleDefinition = scheduleDefinition.getScheduleDefinition();
+            if (startTime != null) {
                 final Calendar calendar = Calendar.getInstance();
                 final Date startAt = Date
-                        .from(scheduleDefinition.getStartTime().atZone(ZoneId.systemDefault()).toInstant());
+                        .from(startTime.atZone(ZoneId.systemDefault()).toInstant());
 
                 calendar.setTime(startAt);
                 final int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -66,39 +64,31 @@ final class QuartzScheduleServiceImpl implements TaskScheduleService {
                 log.info("Hour : " + hour + ". Minute : " + minute + ". Second : " + second + ". DOM : " + dom
                         + ". Month : " + month + ". Year : " + year);
 
+                CronTrigger cron;
                 if (new Date().before(startAt)) {
                     cron = TriggerBuilder.newTrigger()
                             .withSchedule(
-                                    CronScheduleBuilder.cronSchedule(scheduleDefinition.getScheduleDefinition())
+                                    CronScheduleBuilder.cronSchedule(cronScheduleDefinition)
                                             .inTimeZone(TimeZone.getDefault()))
                             .startAt(DateBuilder.dateOf(hour, minute, second, dom, month, year))
                             .build();
                 } else {
                     cron = TriggerBuilder.newTrigger()
                             .withSchedule(
-                                    CronScheduleBuilder.cronSchedule(scheduleDefinition.getScheduleDefinition())
+                                    CronScheduleBuilder.cronSchedule(cronScheduleDefinition)
                                             .inTimeZone(TimeZone.getDefault()))
                             .build();
                 }
-            } else {
-                cron = TriggerBuilder.newTrigger()
+
+                scheduleJob(jobId, cron, (JobDetail) task);
+            } else if (cronScheduleDefinition != null) {
+                CronTrigger cron = TriggerBuilder.newTrigger()
                         .withSchedule(
-                                CronScheduleBuilder.cronSchedule(scheduleDefinition.getScheduleDefinition())
+                                CronScheduleBuilder.cronSchedule(cronScheduleDefinition)
                                         .inTimeZone(TimeZone.getDefault()))
                         .build();
-            }
 
-            try {
-                taskScheduler.scheduleJob(jobDetail, cron);
-                log.info("Scheduling task with job id: " + jobId);
-                log.info("Next execution time : " + cron.getNextFireTime().toString());
-                jobs.add(ScheduledTasksDto.builder()
-                        .taskId(jobId)
-                        .scheduledTask(jobDetail)
-                        .nextExecutionTime(cron.getNextFireTime().toString())
-                        .build());
-            } catch (SchedulerException e) {
-                e.printStackTrace();
+                scheduleJob(jobId, cron, (JobDetail) task);
             }
         } else {
             log.info("Schedule Definition cannot be null.");
@@ -108,7 +98,7 @@ final class QuartzScheduleServiceImpl implements TaskScheduleService {
     @Override
     public boolean removeScheduledTask(String jobId) {
         final ScheduledTasksDto scheduledTask = findTaskById(jobId);
-        if (Objects.nonNull(scheduledTask)) {
+        if (scheduledTask != null) {
             boolean isJobDeleted = false;
             try {
                 log.info("Active tasks before canceled: " + taskScheduler.getCurrentlyExecutingJobs().size());
@@ -153,6 +143,21 @@ final class QuartzScheduleServiceImpl implements TaskScheduleService {
     private ScheduledTasksDto findTaskById(String taskId) {
         return jobs.stream()
                 .filter(task -> task.getTaskId().equals(taskId)).findFirst().orElse(null);
+    }
+
+    private void scheduleJob(String jobId, CronTrigger cron, JobDetail jobDetail) {
+        try {
+            taskScheduler.scheduleJob(jobDetail, cron);
+            log.info("Scheduling task with job id: " + jobId);
+            log.info("Next execution time : " + cron.getNextFireTime().toString());
+            jobs.add(ScheduledTasksDto.builder()
+                    .taskId(jobId)
+                    .scheduledTask(jobDetail)
+                    .nextExecutionTime(cron.getNextFireTime().toString())
+                    .build());
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -15,11 +15,17 @@ import org.springframework.lang.Nullable;
  │ │ │ │ │ │
  * * * * * *
  */
-public interface ScheduleDefinition {
+public interface IScheduleDefinition {
 
     String getScheduleDefinition();
 
     @Nullable
     LocalDateTime getStartTime();
+
+    default String generateScheduleDefinition(LocalDateTime dateTime) {
+        return dateTime.getSecond() + " " + dateTime.getMinute() + " "
+                + dateTime.getHour() + " " + dateTime.getDayOfMonth() + " "
+                + dateTime.getMonthValue() + " ? " + dateTime.getYear();
+    }
 
 }
