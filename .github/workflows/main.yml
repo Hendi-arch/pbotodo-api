@@ -1,0 +1,52 @@
+name: Test, Build PBO-TODO API
+
+# The workflow will run if the following conditions are met:
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker-build:
+    name: Build and Publish to Docker Hub
+    runs-on: ubuntu-22.04
+    steps:
+      # Checkout the branch
+      - name: Checkout branch
+        uses: actions/checkout@v3
+
+      # Set up Java/Maven.
+      - name: Setting up Java / Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # Build and deploy.
+      - name: Building jar
+        run: |
+          mvn clean package -Dmaven.test.skip=true
+
+      # Set up docker account.
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      # Set up docker environment.
+      - name: Build Docker image
+        run: |
+          echo "IMAGE_NAME=${{ secrets.DOCKER_REPO }}/${{ secrets.SERVICE_NAME }}" >> $GITHUB_ENV
+
+      # Build and deploy.
+      - name: Build Docker image
+        run: |
+          echo "Building image $IMAGE_NAME"
+          docker build --build-arg JAR_FILE=$ARTIFACT_JAR_FILE --tag $IMAGE_NAME:latest --tag $IMAGE_NAME:${GITHUB_SHA::8} .
+        env:
+          ARTIFACT_JAR_FILE: target/pbotodo-api.jar
+
+      # Push Docker image.
+      - name: Publish Docker image
+        run: docker push $IMAGE_NAME:latest

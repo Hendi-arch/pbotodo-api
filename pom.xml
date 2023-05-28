@@ -101,6 +101,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>pbotodo-api</finalName>
 	</build>
 
 </project>

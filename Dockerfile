@@ -1,5 +1,5 @@
 # Stage 1
-FROM maven:3.9.0-eclipse-temurin-17-alpine AS mavenBuilder
+FROM maven:3.9.2-eclipse-temurin-17-alpine AS mavenBuilder
 WORKDIR /application
 
 # Copy codebase
@@ -9,7 +9,7 @@ COPY . .
 RUN mvn clean package -Dmaven.test.skip=true
 
 # Stage 2
-FROM eclipse-temurin:17.0.6_10-jre-alpine AS builder
+FROM eclipse-temurin:8u372-b07-jre-alpine AS builder
 WORKDIR /application
 
 # Copy artifact from builder
@@ -19,7 +19,7 @@ COPY --from=mavenBuilder application/target/*.jar ./app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 # Stage 3
-FROM eclipse-temurin:17.0.6_10-jre-alpine
+FROM eclipse-temurin:8u372-b07-jre-alpine
 WORKDIR /service
 
 # Copy artifact from builder
