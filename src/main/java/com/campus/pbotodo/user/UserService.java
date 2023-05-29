@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -71,7 +70,7 @@ public class UserService {
 
             return new UserAuthResponse(username, token);
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username/password");
+            throw new BadRequestException("Invalid username/password");
         }
     }
 
@@ -97,7 +96,7 @@ public class UserService {
 
             return new UserAuthResponse(username, token);
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username/password");
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -105,7 +104,7 @@ public class UserService {
         try {
             String jwtToken = jwtUtilities.extractBearer(bearer);
             if (Objects.isNull(jwtToken)) {
-                throw new BadCredentialsException("Invalid token");
+                throw new BadRequestException("Invalid token");
             }
             String username = jwtUtilities.extractUser(jwtToken);
 
@@ -117,7 +116,7 @@ public class UserService {
 
             return new UserAuthResponse(userTokenData.getUsername(), userTokenData.getToken());
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username/password");
+            throw new BadRequestException("Invalid username/password");
         }
     }
 

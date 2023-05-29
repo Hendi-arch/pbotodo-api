@@ -26,7 +26,7 @@ public class MyUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         User user = userRepo.findByUsername(username);
         if (user == null)
-            throw new UsernameNotFoundException("Expired or invalid JWT token");
+            throw new UsernameNotFoundException("Invalid username/password");
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         grantedAuthorities.add(new SimpleGrantedAuthority(user.getRole()));
