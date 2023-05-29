@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8u372-b07-jre-alpine
+FROM eclipse-temurin:17.0.7_7-jre-alpine
 WORKDIR /service
 
 # Artifact
