@@ -25,7 +25,7 @@ public class UserFeedbackController {
         this.userRepo = userRepo;
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{user}")
     public ResponseEntity<String> submitFeedback(@PathVariable String user,
             @Valid @RequestBody UserFeedbackEntity userFeedback) {
         if (userRepo.existsByUsername(user)) {
