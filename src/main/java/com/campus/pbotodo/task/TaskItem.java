@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public class TaskItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "title is required")
