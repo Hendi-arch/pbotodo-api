@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
@@ -11,15 +12,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.campus.pbotodo.security.filter.CorsSecurityConfig;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import com.campus.pbotodo.security.filter.JWTSecurityMethodFilters;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurer {
 
-    private static final String[] AUTH_WHITELIST = {
-            "/api/auth/signin",
-            "/api/auth/signup"
+    private static final String[] UNSECURED_ENDPOINTS = {
+            "/api/auth/*"
     };
 
     // Define final fields and inject them through constructor
@@ -40,16 +42,16 @@ public class SecurityConfigurer {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Configure security for the application
-        http.csrf().disable()
-                .exceptionHandling()
-                .and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeHttpRequests()
-                .antMatchers(AUTH_WHITELIST)
-                .permitAll().anyRequest().authenticated();
+        http.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(customizer -> customizer
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        customizer -> customizer
+                                .antMatchers(UNSECURED_ENDPOINTS).permitAll()
+                                .anyRequest().authenticated());
 
         // Allow cross origin requests
-        http.cors();
+        http.cors(withDefaults());
 
         // Set user details service and add filters
         http.userDetailsService(myUserDetailService);

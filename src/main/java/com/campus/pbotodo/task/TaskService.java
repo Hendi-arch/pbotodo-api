@@ -34,7 +34,7 @@ public class TaskService {
         JobDetail jobDetail = JobBuilder.newJob()
                 .withIdentity(taskDefinitionData.get("scheduleId").toString())
                 .withDescription("Notify user " + task.getUsername()
-                        + " for Task Due Soon " + task.getTitle())
+                        + " for Task " + task.getTitle())
                 .setJobData(new JobDataMap(taskDefinitionData))
                 .ofType(TaskReminderJobDefinition.class)
                 .build();

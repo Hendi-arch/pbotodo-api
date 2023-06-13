@@ -42,8 +42,13 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
 
     private TaskRepo taskRepo;
 
-    private void sendPushNotifications(List<UserToken> userToBeNotify, Long taskId, String taskName, String username,
-            String scheduleId, String taskUrgency) {
+    private void sendPushNotifications(List<UserToken> userToBeNotify, Map<String, Object> jobDataMap) {
+        final Long taskId = (Long) jobDataMap.get("taskId");
+        final String taskName = (String) jobDataMap.get("taskName");
+        final String username = (String) jobDataMap.get("username");
+        final String taskUrgency = (String) jobDataMap.get("taskUrgency");
+        final String scheduleId = (String) jobDataMap.get("scheduleId");
+
         for (UserToken user : userToBeNotify) {
             Map<String, String> notificationContentDataFCM = new HashMap<>();
             notificationContentDataFCM.put("taskId", taskId.toString());
@@ -58,7 +63,7 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
             pushNotificationConfig.setChannelId(TaskUrgency.fromValue(taskUrgency).value);
             try {
                 FCMService.sendMessage(PushNotificationRequest.builder()
-                        .title("Task Due Soon - " + taskName)
+                        .title(taskName)
                         .message("Complete before deadline.")
                         .data(notificationContentDataFCM)
                         .token(user.getDeviceId())
@@ -77,17 +82,12 @@ public class TaskReminderJobDefinition implements TaskActionInterface {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("TaskReminderScheduleAction.sendPushNotification()");
         final JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-
-        final Long taskId = jobDataMap.getLong("taskId");
-        final String taskName = jobDataMap.getString("taskName");
-        final String username = jobDataMap.getString("username");
-        final String taskUrgency = jobDataMap.getString("taskUrgency");
-        final String scheduleId = jobDataMap.getString("scheduleId");
+        final Long taskId = (Long) jobDataMap.get("taskId");
+        final String username = (String) jobDataMap.get("username");
 
         List<UserToken> userToBeNotify = userTokenRepo.findActiveDeviceIds(username);
-
         try {
-            sendPushNotifications(userToBeNotify, taskId, taskName, username, scheduleId, taskUrgency);
+            sendPushNotifications(userToBeNotify, context.getJobDetail().getJobDataMap());
             context.getScheduler().deleteJob(context.getJobDetail().getKey());
         } catch (Exception e) {
             log.info("Error when run TaskReminderScheduleAction.sendPushNotification() with TaskID"

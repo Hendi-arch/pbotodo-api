@@ -1,11 +1,11 @@
-package com.campus.pbotodo.user;
+package com.campus.pbotodo.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserAuthResponse {
+public class UserAuthDto {
     
     private String user;
 

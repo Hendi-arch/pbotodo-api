@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.campus.pbotodo.exception.BadRequestException;
 import com.campus.pbotodo.security.MyUserDetailService;
 import com.campus.pbotodo.security.utils.JwtUtilities;
+import com.campus.pbotodo.user.dto.UserAuthDto;
 
 @Service
 public class UserService {
@@ -37,7 +38,7 @@ public class UserService {
     @Autowired
     private MyUserDetailService myUserDetailService;
 
-    public UserAuthResponse signup(User userSignupRequest) {
+    public UserAuthDto signup(User userSignupRequest) {
         try {
             String username = userSignupRequest.getUsername();
             String password = userSignupRequest.getPassword();
@@ -68,13 +69,13 @@ public class UserService {
                     .updatedBy(username)
                     .build());
 
-            return new UserAuthResponse(username, token);
+            return new UserAuthDto(username, token);
         } catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username/password");
         }
     }
 
-    public UserAuthResponse signin(User userSigninRequest) {
+    public UserAuthDto signin(User userSigninRequest) {
         try {
             String username = userSigninRequest.getUsername();
             String deviceId = userSigninRequest.getDeviceId();
@@ -94,13 +95,13 @@ public class UserService {
                     .updatedBy(username)
                     .build());
 
-            return new UserAuthResponse(username, token);
+            return new UserAuthDto(username, token);
         } catch (AuthenticationException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
-    public UserAuthResponse logout(String bearer) {
+    public UserAuthDto logout(String bearer) {
         try {
             String jwtToken = jwtUtilities.extractBearer(bearer);
             if (Objects.isNull(jwtToken)) {
@@ -114,10 +115,24 @@ public class UserService {
             userTokenData.setUpdatedAt(LocalDateTime.now());
             userTokenRepo.save(userTokenData);
 
-            return new UserAuthResponse(userTokenData.getUsername(), userTokenData.getToken());
+            return new UserAuthDto(userTokenData.getUsername(), userTokenData.getToken());
         } catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username/password");
         }
+    }
+
+    public void forgotPassword(User userData) {
+        String username = userData.getUsername();
+        String password = userData.getPassword();
+        if (!userRepo.existsByUsername(username)) {
+            throw new BadRequestException("Invalid username");
+        }
+
+        User existingData = userRepo.findByUsername(username);
+        existingData.setPassword(passwordEncoder.encode(password));
+        existingData.setUpdatedAt(LocalDateTime.now());
+        existingData.setUpdatedBy(username);
+        userRepo.save(existingData);
     }
 
 }
