@@ -1,13 +1,13 @@
 version: '3.3'
 
 services:
-  todo-db:
+  cuother-db:
     image: postgres
-    container_name: todo-db
+    container_name: cuother-db
     ports:
       - 5432:5432
     volumes:
-      - todo_db_volume:/var/lib/postgresql/data
+      - cuother_db_volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgrespass
@@ -18,15 +18,15 @@ services:
 
   todo-api:
     depends_on:
-      - todo-db
-    image: pbo/todo-api
-    container_name: todo-api
+      - cuother-db
+    image: cuother/cuother-api
+    container_name: cuother-api
     ports:
       - 4000:4000
     volumes:
-      - /home/hendinofiansyah11/projects/pbo/todo/pbotodo-firebase-adminsdk-glb5o-8821864afc.json:/service/firebase-adminsdk.json
+      - ./fadmin-sdk.json:/service/firebase-adminsdk.json
     restart: always
 
 volumes:
-  todo_db_volume:
+  cuother_db_volume:
     external: true
