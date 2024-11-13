@@ -36,6 +36,7 @@ public class User {
 
     @NotNull(message = "Password is null")
     @NotEmpty(message = "Password is empty")
+    @Column(nullable = false, length = 1000)
     private String password;
 
     @Builder.Default

@@ -34,10 +34,10 @@ public class UserToken {
 
     @NotNull(message = "Token is null")
     @NotEmpty(message = "Token is empty")
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 1000)
     private String token;
 
-    @Column(name = "device_id")
+    @Column(name = "device_id", length = 1000)
     private String deviceId;
 
     @Column(name = "expired_date", nullable = false)
